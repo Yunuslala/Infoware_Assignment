@@ -102,20 +102,18 @@ router.get("/employee",async(req,res)=>{
         const emplyees=await Employee.findAll({
             limit: pageSize,
             offset: offset,
-          },{ include: Contact });
-        if(emplyees.length==0){
-            return res.status(404).send({"msg":`id ${id} is not valid`})
-         }
+            include: Contact
+          });
         res.status(200).send(emplyees)
     } catch (error) {
         console.log(error);
         res.status(500).send({ msg: error });
     }
-})
+}) 
 router.get("/employee/:id",async(req,res)=>{
     try {
-        const {id}=req.params
-        const emplyees=await Employee.findAll({where:{id}},{ include: Contact });
+      const {id}=req.params
+      const emplyees=await Employee.findAll({where:{id},include: Contact });
         if(emplyees.length==0){
             return res.status(404).send({"msg":`id ${id} is not valid`})
          }
@@ -149,7 +147,7 @@ router.get("/contacts",async(req,res)=>{
 router.get("/contacts/:id",async(req,res)=>{
     try {
         const {id}=req.params
-        const Contacts=await Contact.findAll({where:{id}},{include: Employee });
+        const Contacts=await Contact.findAll({where:{id},include: Employee});
         if(Contacts.length==0){
            return res.status(404).send({"msg":`id ${id} is not valid`})
         }
@@ -162,7 +160,7 @@ router.get("/contacts/:id",async(req,res)=>{
 router.delete("/contacts/:id",async(req,res)=>{
     try {
         const {id}=req.params
-        const Contacts=await Contact.destroy({where:{id}},{include: Employee });
+        const Contacts=await Contact.destroy({where:{id}});
         if(Contacts.length==0){
            return res.status(404).send({"msg":`id ${id} is not valid`})
         }
@@ -181,10 +179,8 @@ body('jobTitle').optional().notEmpty(),async(req,res)=>{
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-
   const { id } = req.params;
-  const employee = await Employee.findOne({ where: { customId: id } });
-
+  const employee = await Employee.findOne({ where: { id } });
   if (!employee) {
     return res.status(404).json({ error: 'Employee not found' });
   }
@@ -208,7 +204,7 @@ body('email').optional().isEmail(),body('address').optional().isString(),async(r
   }
 
   const { id } = req.params;
-  const contacts = await Contact.findOne({ where: { customId: id } });
+  const contacts = await Contact.findOne({ where: {  id } });
 
   if (!contacts ) {
     return res.status(404).json({ error: 'contacts  not found' });
@@ -217,7 +213,7 @@ body('email').optional().isEmail(),body('address').optional().isString(),async(r
   contacts .email = req.body.email || contacts .email;
   contacts .address = req.body.address || contacts .address;
   await contacts .save();
-        res.status(204).send({"msg":`id ${id} contact has been updated`,employee})
+        res.status(204).send({"msg":`id ${id} contact has been updated`,contacts})
     } catch (error) {
         console.log(error);
         res.status(500).send({ msg: error });
